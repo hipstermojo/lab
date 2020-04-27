@@ -7,8 +7,10 @@ if (isset($_POST['btn-save'])) {
     $first_name = $_POST['first_name'];
     $last_name = $_POST['last_name'];
     $city = $_POST['city_name'];
+    $uname = $_POST['username'];
+    $pass = $_POST['password'];
 
-    $user = new User($first_name,$last_name,$city);
+    $user = new User($first_name,$last_name,$city,$uname,$pass);
     if (!$user->valiteForm()) {
         $user->createFormErrorSessions();
         header("Refresh:0");
@@ -56,7 +58,16 @@ if (isset($_POST['btn-save'])) {
                 <td><input type="text" name="city_name" placeholder="City"></td>
             </tr>
             <tr>
+                <td><input type="text" name="username" placeholder="Username"></td>
+            </tr>
+            <tr>
+                <td><input type="password" name="password" placeholder="Password"></td>
+            </tr>
+            <tr>
                 <td><button type="submit" name="btn-save"><strong>SAVE</strong></button></td>
+            </tr>
+            <tr>
+                <td><a href="login.php">Login</a></td>
             </tr>
         </table>
     </form>
@@ -70,7 +81,7 @@ if (isset($_POST['btn-save'])) {
             </thead>
             <?
 
-                $user = new User("","","");
+                $user = new User("","","","","");
                 $db_users = $user->readAll($db->conn);
                 foreach ($db_users as $db_user) {
             ?>
