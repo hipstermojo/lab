@@ -9,6 +9,11 @@ if (isset($_POST['btn-save'])) {
     $city = $_POST['city_name'];
 
     $user = new User($first_name,$last_name,$city);
+    if (!$user->valiteForm()) {
+        $user->createFormErrorSessions();
+        header("Refresh:0");
+        die();
+    }
     $res = $user->save($db->conn);
 
     if ($res) {
@@ -22,10 +27,25 @@ if (isset($_POST['btn-save'])) {
 <html>
 <head>
     <title>Sample Document</title>
+    <script type="text/javascript" src="validate.js"></script>
+    <link rel="stylesheet" type="text/css" href="validate.css">
 </head>
 <body>
-    <form method="post" action="<?$_SERVER['PHP_SELF']?>">
+    <form method="post" name="user_details" id="user_details" onsubmit="return validateForm()" action="<?$_SERVER['PHP_SELF']?>">
         <table align="center">
+            <tr>
+                <td>
+                    <div>
+                    <?php
+                        session_start();
+                        if (!empty($_SESSION['form_errors'])) {
+                            echo " " . $_SESSION['form_errors'];
+                            unset($_SESSION['form_errors']);
+                        }
+                    ?>
+                    </div>
+                </td>
+            </tr>
             <tr>
                 <td><input type="text" name="first_name" required placeholder="First Name"></td>
             </tr>
