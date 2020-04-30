@@ -159,5 +159,11 @@
             session_start();
             $_SESSION['form_errors'] = "All fields are required";
         }
+
+        public function isUserExist($conn)
+        {
+            $res = $conn->query("SELECT * FROM user WHERE username = '$this->username' LIMIT 1");
+            return $res->num_rows > 0;
+        }
     }
 ?>

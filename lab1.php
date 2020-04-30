@@ -3,7 +3,7 @@ include_once 'DBConnector.php';
 include_once 'user.php';
 $db = new DBConnector();
 
-if (isset($_POST['btn-save'])) {
+if (isset($_POST['btn-save'])) {    
     $first_name = $_POST['first_name'];
     $last_name = $_POST['last_name'];
     $city = $_POST['city_name'];
@@ -12,10 +12,16 @@ if (isset($_POST['btn-save'])) {
 
     $user = new User($first_name,$last_name,$city,$uname,$pass);
     if (!$user->valiteForm()) {
+        $user->createFormErrorSessions();        
+        header("Refresh:0");
+        die();
+    } else if (!$user->isUserExist($db->conn)){
         $user->createFormErrorSessions();
+        $_SESSION['form_errors'] = "This username is already taken";
         header("Refresh:0");
         die();
     }
+
     $res = $user->save($db->conn);
 
     if ($res) {
@@ -37,7 +43,7 @@ if (isset($_POST['btn-save'])) {
         <table align="center">
             <tr>
                 <td>
-                    <div>
+                    <div id="form-errors">
                     <?php
                         session_start();
                         if (!empty($_SESSION['form_errors'])) {
