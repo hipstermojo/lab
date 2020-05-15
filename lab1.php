@@ -1,6 +1,7 @@
 <?php
 include_once 'DBConnector.php';
 include_once 'user.php';
+include_once 'fileUploader.php';
 $db = new DBConnector();
 
 if (isset($_POST['btn-save'])) {    
@@ -11,11 +12,12 @@ if (isset($_POST['btn-save'])) {
     $pass = $_POST['password'];
 
     $user = new User($first_name,$last_name,$city,$uname,$pass);
+    $uploader = new FileUploader();
     if (!$user->valiteForm()) {
         $user->createFormErrorSessions();        
         header("Refresh:0");
         die();
-    } else if (!$user->isUserExist($db->conn)){
+    } else if ($user->isUserExist($db->conn)){
         $user->createFormErrorSessions();
         $_SESSION['form_errors'] = "This username is already taken";
         header("Refresh:0");
@@ -24,10 +26,13 @@ if (isset($_POST['btn-save'])) {
 
     $res = $user->save($db->conn);
 
-    if ($res) {
+    $file_upload_response = $uploader->uploadFile($_FILES['fileToUpload']);
+
+
+    if ($res && $file_upload_response) {
         echo "Save operation was successful";
-    } else {
-        echo "An error occured!";
+    } else if(!$file_upload_response && empty($_SESSION['form_errors'])){
+        $_SESSION['form_errors'] = "File upload was unsuccessful";
     }
     
 }
@@ -39,13 +44,15 @@ if (isset($_POST['btn-save'])) {
     <link rel="stylesheet" type="text/css" href="validate.css">
 </head>
 <body>
-    <form method="post" name="user_details" id="user_details" onsubmit="return validateForm()" action="<?$_SERVER['PHP_SELF']?>">
+    <form method="post" name="user_details" id="user_details" enctype="multipart/form-data" onsubmit="return validateForm()" action="<?=$_SERVER['PHP_SELF']?>">
         <table align="center">
             <tr>
                 <td>
                     <div id="form-errors">
                     <?php
-                        session_start();
+                        if (session_status() == PHP_SESSION_NONE) {
+                            session_start();
+                        }
                         if (!empty($_SESSION['form_errors'])) {
                             echo " " . $_SESSION['form_errors'];
                             unset($_SESSION['form_errors']);
@@ -55,19 +62,22 @@ if (isset($_POST['btn-save'])) {
                 </td>
             </tr>
             <tr>
-                <td><input type="text" name="first_name" required placeholder="First Name"></td>
+                <td><input type="text" name="first_name" required placeholder="First Name" required></td>
             </tr>
             <tr>
-                <td><input type="text" name="last_name" placeholder="Last Name"></td>
+                <td><input type="text" name="last_name" placeholder="Last Name" required></td>
             </tr>
             <tr>
-                <td><input type="text" name="city_name" placeholder="City"></td>
+                <td><input type="text" name="city_name" placeholder="City" required></td>
             </tr>
             <tr>
-                <td><input type="text" name="username" placeholder="Username"></td>
+                <td><input type="text" name="username" placeholder="Username" required></td>
             </tr>
             <tr>
-                <td><input type="password" name="password" placeholder="Password"></td>
+                <td><input type="password" name="password" placeholder="Password" required></td>
+            </tr>
+            <tr>
+                <td>Profile image:<input type="file" name="fileToUpload" id="fileToUpload" required></td>
             </tr>
             <tr>
                 <td><button type="submit" name="btn-save"><strong>SAVE</strong></button></td>
@@ -85,18 +95,17 @@ if (isset($_POST['btn-save'])) {
                 <td>Last Name</td>
                 <td>City</td>
             </thead>
-            <?
-
+            <?php            
                 $user = new User("","","","","");
                 $db_users = $user->readAll($db->conn);
                 foreach ($db_users as $db_user) {
             ?>
              <tr>
-                    <td><?echo $db_user[0]?></td>
-                    <td><?echo $db_user[1]?></td>
-                    <td><?echo $db_user[2]?></td>
-             </tr>   
-            <?
+                    <td><?php echo $db_user[0] ?></td>
+                    <td><?php echo $db_user[1] ?></td>
+                    <td><?php echo $db_user[2] ?></td>
+             </tr>
+            <?php
                 }
                 $db->closeDatabase();
             ?>
