@@ -11,7 +11,10 @@ if (isset($_POST['btn-save'])) {
     $uname = $_POST['username'];
     $pass = $_POST['password'];
 
-    $user = new User($first_name,$last_name,$city,$uname,$pass);
+    $utc_timestamp = $_POST['utc_timestamp'];
+    $offset = $_POST['time_zone_offset'];
+
+    $user = new User($first_name,$last_name,$city,$uname,$pass,$utc_timestamp,$offset);
     $uploader = new FileUploader();
     if (!$user->valiteForm()) {
         $user->createFormErrorSessions();        
@@ -77,11 +80,13 @@ if (isset($_POST['btn-save'])) {
                 <td><input type="password" name="password" placeholder="Password" required></td>
             </tr>
             <tr>
-                <td>Profile image:<input type="file" name="fileToUpload" id="fileToUpload" required></td>
+                <td>Profile image:<input type="file" name="fileToUpload" id="fileToUpload" accept="image/*" required></td>
             </tr>
             <tr>
                 <td><button type="submit" name="btn-save"><strong>SAVE</strong></button></td>
             </tr>
+            <input type="hidden" name="utc_timestamp" id="utc_timestamp" value="">
+            <input type="hidden" name="time_zone_offset" id="time_zone_offset" value="">
             <tr>
                 <td><a href="login.php">Login</a></td>
             </tr>
@@ -96,7 +101,7 @@ if (isset($_POST['btn-save'])) {
                 <td>City</td>
             </thead>
             <?php            
-                $user = new User("","","","","");
+                $user = User::create();
                 $db_users = $user->readAll($db->conn);
                 foreach ($db_users as $db_user) {
             ?>
@@ -111,5 +116,7 @@ if (isset($_POST['btn-save'])) {
             ?>
         </table>
     </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="./timezone.js" type="text/javascript"></script>
 </body>
 </html>

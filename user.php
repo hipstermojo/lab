@@ -10,17 +10,22 @@
         private $username;
         private $password;
 
-        function __construct($first_name,$last_name,$city_name,$username,$password){
+        private $created_at;
+        private $utc_offset;
+
+        function __construct($first_name,$last_name,$city_name,$username,$password,$created_at,$utc_offset){
             $this->first_name = $first_name;
             $this->last_name = $last_name;
             $this->city_name = $city_name;
             $this->username = $username;
             $this->password = $password;
+            $this->created_at = date("Y-m-d H:i:s", intdiv(intval($created_at) , 1000));
+            $this->utc_offset = intval($utc_offset);
         }
 
         public static function create()
         {
-            $instance = new self("","","","","");
+            $instance = new self("","","","","",time(),0);
             return $instance;
         }
 
@@ -49,6 +54,26 @@
             $this->user_id = $user_id;
         }
 
+        public function getCreatedAt()
+        {
+            return $this->created_at;
+        }
+
+        public function setCreatedAt($created_at)
+        {
+            $this->created_at = $created_at;
+        }
+
+        public function getUTCOffset()
+        {
+            return $this->utc_offset;
+        }
+
+        public function setUTCOffset($offset)
+        {
+            $this->utc_offset = $offset;
+        }
+
         public function save($conn)
         {
             $fn = $this->first_name;
@@ -57,7 +82,12 @@
             $uname = $this->username;
             $this->hashPassword();
             $pass = $this->password;
-            $res = $conn->query("INSERT INTO user(first_name,last_name,user_city,username,password) VALUES('$fn','$ln','$city','$uname','$pass')");
+            $created_at = $this->created_at;
+            $offset = $this->utc_offset;
+            $res = $conn->query(
+                "INSERT INTO user(first_name,last_name,user_city,username,password,created_at,offset) "
+                . "VALUES('$fn','$ln','$city','$uname','$pass','$created_at',$offset)"
+            );
             if ($res=== FALSE) {
                 die("Error: " . $conn->error);
             }
