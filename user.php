@@ -108,6 +108,7 @@
             } else {
                 while ($row = $res->fetch_assoc()) {
                     if (password_verify($this->getPassword(),$row['password']) && $this->getUsername() == $row['username']) {
+                        $this->setUserId($row['id']);
                         $found = true;
                     }
                 }
@@ -126,12 +127,14 @@
         public function createUserSession(){
             session_start();
             $_SESSION['username'] = $this->getUsername();
+            $_SESSION['user_id'] = $this->user_id;
         }
 
         public function logout()
         {
             session_start();
             unset($_SESSION['username']);
+            unset($_SESSION['user_id']);
             session_destroy();
             header("Location:lab1.php");
         }

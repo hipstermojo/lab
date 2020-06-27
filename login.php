@@ -26,7 +26,7 @@
         <link rel="stylesheet" type="text/css" href="validate.css">
     </head>
     <body>
-        <form method="post" name="login" id="login" action="<?$_SERVER['PHP_SELF']?>" >
+        <form method="post" name="login" id="login" action="<?php $_SERVER['PHP_SELF']?>" >
             <table align="center">
                 <tr>
                     <td><input type="text" name="username" placeholder="Username" required></td>
